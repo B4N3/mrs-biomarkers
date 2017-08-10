@@ -1,0 +1,60 @@
+<html>
+
+<img src=brp-voxel-communication.png>
+
+<h3>BRP Sequence for Siemens</h3>
+<a href=BRP_Seq_VE11C.zip>Download BRP_Seq_VE11C.zip</a>
+
+<h3>BRP client software</h3>
+<a href=brp.zip>Download BRP software (64-bit)</a>
+<a href=brpperl.zip>Download BRP client perl script</a>
+
+<h3>Installing the BRP Client Software</h3>
+<ul>
+<li>Download above zip file.</li>
+<li>Extract contents of zip file to C:\MedUser\MriCustomer\seq folder.</li>
+<li>Use notepad to edit C:\MedUser\MriCustomer\seq\brp\brp-config.bat</li>
+<li>Confirm the software path.</li>
+<li>Set the encryption password for data.</li>
+<li>Set your site login user and password for upload (future).</li>
+<li>Communicate the settings to the BRP central site contact.</li>
+</ul>
+
+<h3>Using the BRP Client Software</h3>
+<ul>
+<li>Run the MP-RAGE sequence.</li>
+<li>Save the DICOM data in C:\MedUser\MriCustomer\seq\brp\data in a folder (e.g. folder1).</li>
+<li>CTL-ESC and open a command window by running cmd.exe.</li>
+<li>cd C:\MedUser\MriCustomer\seq\brp</li>
+<li>brp-send-receive.bat data\folder1</li>
+<li>Wait 45 seconds. The status will change from ready to received and then to complete.</li>
+<li>Run the MRS sequence. It will use the voxel results in brp\inbox\coordinates.ini.</li>
+</ul>
+
+<h3>BRP relay software</h3>
+<p>You only need this if you can't reach http://brp.cmrr.umn.edu or http://brp.cmrr.umn.edu:81 directly from your scanner!</p>
+<a href=brprelay.tgz>Download BRP relay software</a>
+<br><a href=brprelay-website.tgz>Download BRP relay website</a>
+
+<h3>Installing the BRP Relay software</h3>
+<ul>
+<li>Download the brprelay.tgz and extract under /opt. You now have /opt/brp.</li>
+<li>Modify /opt/brp/site.passwords to include the user id and password for the main BRP website.</li>
+<li>Modify /opt/brp/relay for your website.  Run /opt/brp/relay at system start to make the relay function.  It will check for new uploads and downloads.  </li>
+</ul>
+<ul>
+<li>Make sure your website is functioning already. This was developed using apache on linux.</li>
+<li>Download the brprelay-website.tgz and extract under your website html directory /website. You now have /website/brprelay.</li>
+<li>Add a .htaccess file and set a password for your /website/brprelay directory to protect it. Check this with a web browser.</li>
+<li>Use this user id and password on your brp-config.bat file on the scanner. Change the URL there to point at the relay (http://yourserver/brprelay/api.php)</li>
+<li>At this point you should be able to run the scanner, send to the relay, and have the relay forward the data. The relay will watch for a result and put it in place for the scanner in the relay website.</li>
+</ul>
+
+<h3>BRP Contacts at CMRR</h3>
+
+<ul>
+<li>Project contact: Gulin Oz ozxxx001@umn.edu</li>
+<li>Networking/server contact: Brian Hanna help@cmrr.umn.edu 612-626-0287</li>
+</ul>
+
+</html>

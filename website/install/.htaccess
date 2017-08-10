@@ -1,0 +1,6 @@
+AuthUserFile /var/www/.htpasswd
+AuthName "CMRR BRP"
+AuthType Basic
+
+require valid-user
+
