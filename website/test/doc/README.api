@@ -1,0 +1,217 @@
+API 1.0 usage summary
+=====================
+© 2017 Regents of the University of Minnesota. All rights reserved.
+
+General syntax rules
+--------------------
+file and study names can only contain a-z A-Z 0-9 _ .
+file and study names cannot begin with .
+file and study names cannot be longer than 100 characters
+
+Getting this help
+-----------------
+api.php
+api.php?cmd=help
+   display usage
+
+API version
+-----------
+api.php?cmd=version
+   display API version
+
+Getting results in txt or XML
+-----------------------------
+api.php?cmd=version&output=txt
+api.php?cmd=version&output=xml
+   Commands give their results in either txt or XML format, default=txt
+   for example, display API version in txt and XML results format
+
+Creating new study folders
+--------------------------
+api.php?cmd=new&study=study1
+   create study1 directory
+
+Deleting study folders
+----------------------
+api.php?cmd=delete&study=study1
+   move study1 directory to trash
+
+Listing studies
+---------------
+api.php?cmd=list
+api.php?cmd=list&status=readyqc
+api.php?cmd=list&status=received
+api.php?cmd=list&status=qccomplete
+   list all studies, or studies with a certain status
+
+Listing study files
+-------------------
+api.php?cmd=files&study=study1
+   List files for study1
+
+Getting study statuses
+----------------------
+api.php?cmd=status&study=study1
+   List statuses for study1
+
+Getting a log of study events
+-----------------------------
+api.php?cmd=log&study=study1
+   print the log of events for study1
+
+Uploading study files
+---------------------
+api.php?cmd=put&study=study1&filename=dicom.zip
+api.php?cmd=put&study=study1&filename=results.zip
+   put dicom.zip or results.zip into study1
+   send zip file as POST multi-part form data with using field name file
+   allowed extensions zip, gz, tgz
+   example with curl:
+curl -F 'cmd=put' -F 'study=study1' -F 'filename=dicom.tgz' -F 'file=@/tmp/upload.test/20140428-ST003-phantom.tgz' https://.../api.php
+
+Downloading study files
+-----------------------
+api.php?cmd=get&study=study1&filename=dicom.zip
+api.php?cmd=get&study=study1&filename=results.zip
+   download dicom.zip or results.zip from study1
+   get a file with curl:
+curl -L -F 'cmd=get' -F 'study=study1' -F 'filename=dicom.tgz' -o saveas.tgz -O https://.../api.php
+
+Setting study statuses
+----------------------
+api.php?cmd=set&study=study1&status=readyqc
+api.php?cmd=set&study=study1&status=received
+api.php?cmd=set&study=study1&status=qccomplete
+   set the status of study1
+   using set and unset, a study can have multiple statuses
+   using setonly a study will have only one status
+
+Unsetting study statuses
+------------------------
+api.php?cmd=unset&study=study1&status=readyqc
+api.php?cmd=unset&study=study1&status=received
+api.php?cmd=unset&study=study1&status=qccomplete
+   unset the status of study1
+   using set and unset a study can have multiple statuses
+   using setonly a study will have only one status
+
+Setting one study status (unsetting others)
+-------------------------------------------
+api.php?cmd=setonly&study=study1&status=readyqc
+api.php?cmd=setonly&study=study1&status=received
+api.php?cmd=setonly&study=study1&status=qccomplete
+   set the status of study1 and remove any other status
+   using set and unset a study can have multiple statuses
+   using setonly a study will have only one status
+
+Example usage with curl
+=======================
+
+1. Get a list of studies
+------------------------
+
+# curl -F 'cmd=list' https://.../api.php
+OK list
+123
+20140425-ST001-gosia_PR_phantom
+20140502-ST001-Phantom
+20140502-ST001-phantom_ACR
+study1
+study3
+study4
+study5
+
+2. Get a list of studies that are ready for QC
+----------------------------------------------
+
+# curl -F 'cmd=list' -F 'status=readyqc' https://.../api.php
+OK list status readyqc
+123
+20140425-ST001-gosia_PR_phantom
+20140502-ST001-Phantom
+20140502-ST001-phantom_ACR
+
+3. Check the status of a study
+------------------------------
+
+# curl -F 'cmd=status' -F 'study=20140502-ST001-phantom_ACR' https://.../api.php
+OK status study 20140502-ST001-phantom_ACR
+readyqc
+
+4. Get the names of files in a study folder
+-------------------------------------------
+
+# curl -F 'cmd=files' -F 'study=20140502-ST001-phantom_ACR' https://.../api.php
+OK files study 20140502-ST001-phantom_ACR
+total 10080
+-rw------- 1 apache apache 3440153 May  5 15:43 20140502-ST001-phantom_ACR.tgz
+-rw------- 1 apache apache 3412769 May  5 16:28 20140502-ST001-phantom_ACR.zip
+-rw------- 1 apache apache 3440153 May  5 16:16 20140502-ST001-phantom_ACR.zip.20140505.162853
+
+5. Download a file from a study. (You need the -L for the redirect and the -o to save as a different name.)
+-----------------------------------------------------------------------------------------------------------
+
+# curl -L -F 'cmd=get' -F 'study=20140502-ST001-phantom_ACR' -F 'filename=20140502-ST001-phantom_ACR.zip' -o /tmp/downloadas.zip -O https://.../api.php
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 3332k  100 3332k    0     0  4902k      0 --:--:-- --:--:-- --:--:-- 4902k
+
+6. Set the status on a study to received, then check the status
+---------------------------------------------------------------
+
+# curl -F 'cmd=setonly' -F 'study=20140502-ST001-phantom_ACR' -F 'status=received' https://.../api.php
+OK setonly study 20140502-ST001-phantom_ACR status received
+
+# curl -F 'cmd=status' -F 'study=20140502-ST001-phantom_ACR' https://.../api.php
+OK status study 20140502-ST001-phantom_ACR
+received
+
+7. Save the results back to the study folder
+--------------------------------------------
+
+# curl -F 'cmd=put' -F 'study=20140502-ST001-phantom_ACR' -F 'filename=results.tgz' -F 'file=@/tmp/upload.test/dicom.tgz' https://.../api.php
+OK put study 20140502-ST001-phantom_ACR filename results.tgz
+
+8. Set the study status to QC complete
+--------------------------------------
+
+# curl -F 'cmd=setonly' -F 'study=20140502-ST001-phantom_ACR' -F 'status=qccomplete' https://.../api.php
+OK setonly study 20140502-ST001-phantom_ACR status qccomplete
+
+# curl -F 'cmd=status' -F 'study=20140502-ST001-phantom_ACR' https://.../api.php
+OK status study 20140502-ST001-phantom_ACR
+qccomplete
+
+9. Get a log of events on each study
+------------------------------------
+
+unknown in the log is replaced by the authenticated web user when web server authentication is enabled.
+
+# curl -F "cmd=log" -F "study=20140502-ST001-phantom_ACR" https://.../api.php
+OK log study 20140502-ST001-phantom_ACR
+Mon May  5 13:53:21 2014 160.94.164.194 unknown new
+Mon May  5 13:53:21 2014 160.94.164.194 unknown set status readyqc
+Mon May  5 15:43:16 2014 160.94.164.194 unknown put 20140502-ST001-phantom_ACR.tgz orig_filename 20140502-ST001-phantom_ACR.tgz type application/octet-stream size 3440153
+Mon May  5 15:43:16 2014 160.94.164.194 unknown set status readyqc
+Mon May  5 16:16:08 2014 160.94.164.194 unknown put 20140502-ST001-phantom_ACR.zip orig_filename 20140502-ST001-phantom_ACR.zip type application/octet-stream size 3440153
+Mon May  5 16:16:08 2014 160.94.164.194 unknown set status readyqc
+Mon May  5 16:28:53 2014 160.94.164.194 unknown put 20140502-ST001-phantom_ACR.zip saved old version as 20140502-ST001-phantom_ACR.zip.20140505.162853
+Mon May  5 16:28:53 2014 160.94.164.194 unknown put 20140502-ST001-phantom_ACR.zip orig_filename 20140502-ST001-phantom_ACR.zip type application/octet-stream size 3412769
+Mon May  5 16:28:53 2014 160.94.164.194 unknown set status readyqc
+Mon May  5 16:31:36 2014 134.84.19.184 unknown get 20140502-ST001-phantom_ACR.zip
+Mon May  5 16:48:58 2014 160.94.164.138 unknown get 20140502-ST001-phantom_ACR.zip
+Mon May  5 16:49:50 2014 160.94.164.138 unknown setonly status received remove status readyqc
+Mon May  5 16:49:50 2014 160.94.164.138 unknown setonly status received
+Mon May  5 16:53:50 2014 160.94.164.138 unknown put results.tgz orig_filename dicom.tgz type application/octet-stream size 14702879
+Mon May  5 16:54:18 2014 160.94.164.138 unknown setonly status qccomplete remove status received
+Mon May  5 16:54:18 2014 160.94.164.138 unknown setonly status qccomplete
+
+10. Using user/password authentication with curl
+------------------------------------------------
+
+If user/password authentication is used with api.php, you can pass this safely to api.php this way.
+Create a curl config file e.g. myconfig which contains only a valid username and password separated by a colon :
+username:password
+
+Use the curl config file with -K. This keeps the username and password off of the command line, which is visible to anyone via ps.
+# curl -K myconfig -F "cmd=list" https://.../api.php

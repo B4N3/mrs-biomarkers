@@ -1,0 +1,9 @@
+
+For large file uploads, add to /etc/php.ini:
+
+max_input_time = 9000
+memory_limit = 2147483648
+post_max_size = 2147483648
+file_uploads = On
+upload_max_filesize = 2147483648
+max_file_uploads = 100
